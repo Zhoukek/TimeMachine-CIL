@@ -16,7 +16,7 @@ if [ ! -d "./test_results" ]; then
 fi
 model_name=TimeMachine
 
-root_path_name=../data/weather
+root_path_name=/home/fangyu/Downloads/data/TimeSeries/weather
 data_path_name=weather.csv
 model_id_name=weather
 data_name=custom
