@@ -19,9 +19,9 @@ if __name__ == '__main__':
     parser.add_argument('--model_id_name', type=str, required=False, default='custom', help='model id name')
 
     # DATALOADER
-    parser.add_argument('--data', type=str, required=False, default='ETTm1', help='dataset type')
-    parser.add_argument('--root_path', type=str, default='/home/fangyu/Downloads/data/TimeSeries/ETT/', help='root path of the data file')
-    parser.add_argument('--data_path', type=str, default='ETTh1.csv', help='data file')
+    parser.add_argument('--data', type=str, required=False, default='custom', help='dataset type')
+    parser.add_argument('--root_path', type=str, default='/home/fangyu/Downloads/data/TimeSeries/weather', help='root path of the data file')
+    parser.add_argument('--data_path', type=str, default='weather.csv', help='data file')
     parser.add_argument('--features', type=str, default='M',
                         help='forecasting task, options:[M, S, MS]; M:multivariate predict multivariate, S:univariate predict univariate, MS:multivariate predict univariate')
     parser.add_argument('--target', type=str, default='OT', help='target feature in S or MS task')
@@ -44,7 +44,7 @@ if __name__ == '__main__':
     parser.add_argument('--d_state', type=int, default=256, help='d_state parameter of Mamba')
     parser.add_argument('--dconv', type=int, default=2, help='d_conv parameter of Mamba')
     parser.add_argument('--e_fact', type=int, default=1, help='expand factor parameter of Mamba')
-    parser.add_argument('--enc_in', type=int, default=7, help='encoder input size') #Use this hyperparameter as the number of channels
+    parser.add_argument('--enc_in', type=int, default=21, help='encoder input size') #Use this hyperparameter as the number of channels
     parser.add_argument('--dropout', type=float, default=0.05, help='dropout')
     parser.add_argument('--embed', type=str, default='timeF',
                         help='time features encoding, options:[timeF, fixed, learned]')
