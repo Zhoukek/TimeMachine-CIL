@@ -11,3 +11,10 @@ TimeMachine_supervised/test_results/
 TimeMachine_supervised/result.txt
 TimeMachine_supervised/csv_results/
 .vscode/settings.json
+/.idea/.gitignore
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/inspectionProfiles/profiles_settings.xml
+/.idea/inspectionProfiles/Project_Default.xml
+/.idea/TimeMachine-main.iml
+/.idea/vcs.xml
