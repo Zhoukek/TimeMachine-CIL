@@ -14,13 +14,13 @@ if __name__ == '__main__':
     # BASIC CONFIG
     parser.add_argument('--is_training', type=int, required=False, default=1, help='status')
     parser.add_argument('--model_id', type=str, required=False, default='test', help='model id')
-    parser.add_argument('--model', type=str, required=False, default='Autoformer',
+    parser.add_argument('--model', type=str, required=False, default='TimeMachine',
                         help='model name, options: [TimeMachine]')
     parser.add_argument('--model_id_name', type=str, required=False, default='custom', help='model id name')
 
     # DATALOADER
-    parser.add_argument('--data', type=str, required=True, default='ETTm1', help='dataset type')
-    parser.add_argument('--root_path', type=str, default='./data/ETT/', help='root path of the data file')
+    parser.add_argument('--data', type=str, required=False, default='ETTm1', help='dataset type')
+    parser.add_argument('--root_path', type=str, default='/home/fangyu/Downloads/data/TimeSeries/ETT/', help='root path of the data file')
     parser.add_argument('--data_path', type=str, default='ETTh1.csv', help='data file')
     parser.add_argument('--features', type=str, default='M',
                         help='forecasting task, options:[M, S, MS]; M:multivariate predict multivariate, S:univariate predict univariate, MS:multivariate predict univariate')
