@@ -3,6 +3,30 @@
 ![Alt text](./pics/TimeMachine.PNG)
 ### Welcome to the official repository of: [TimeMachine: A Time Series is Worth 4 Mambas for Long-term Forecasting](https://arxiv.org/pdf/2403.09898.pdf). 
 ## :triangular_flag_on_post: TimeMachine is accepted to [**ECAI**](https://www.ecai2024.eu/) 
+## Requirements
+
+1. Create the environment from the file
+```
+conda env create -f environment.yml
+```
+2. Activate the environment ```tscl```
+```
+conda activate tscl
+```
+3. install  ```mamba-ssm``` ```causal-conv1d```
+```
+conda install packaging
+git clone https://github.com/Dao-AILab/causal-conv1d.git 
+cd causal-conv1d
+git checkout v1.2.0 # current latest version tag 
+CAUSAL_CONV1D_FORCE_BUILD=TRUE pip install .
+cd ..
+git clone https://github.com/state-spaces/mamba.git
+cd ./mamba
+git checkout v1.2.0 # current latest version tag
+MAMBA_FORCE_BUILD=TRUE pip install .
+```
+
 ## Usage
 
 1. Install requirements. ```pip install -r requirements.txt```
