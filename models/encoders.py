@@ -589,6 +589,7 @@ class MambaEncoder(torch.nn.Module):
             x = x + x_res1
 
         x = torch.cat([x, x4], dim=2)
+        x = x.squeeze(1)
         x = self.lin4(x)
         # if self.configs.ch_ind == 1:
         #     x = torch.reshape(x, (-1, self.configs.enc_in, self.configs.pred_len))

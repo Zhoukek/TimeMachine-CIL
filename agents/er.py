@@ -14,6 +14,7 @@ class ExperienceReplay(BaseLearner):
         args.retrieve = 'random'
         args.update = 'random'
         self.buffer = Buffer(model, args)
+        self.args = args
         self.ncm_classifier = args.ncm_classifier
         print('ER mode: {}, NCM classifier: {}'.format(self.er_mode, self.ncm_classifier))
 
@@ -39,6 +40,8 @@ class ExperienceReplay(BaseLearner):
                 loss_ce = self.criterion(outputs_buf, y_buf)
 
             outputs = self.model(x)
+            if self.args.encoder == 'TimeMachine':
+                y = y.repeat_interleave(3)
             loss_ce += self.criterion(outputs, y)
             loss_ce.backward()
             self.optimizer_step(epoch=epoch)
