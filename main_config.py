@@ -159,7 +159,7 @@ if __name__ == "__main__":
     parser.add_argument('--regularize_freq_on_feat', default=False, type=boolean_string)
 
     # Mamba setting
-    parser.add_argument('--seq_len', type=int, default=96, help='input sequence length')
+    parser.add_argument('--seq_len', type=int, default=315, help='input sequence length')
     parser.add_argument('--label_len', type=int, default=48, help='start token length')
     parser.add_argument('--pred_len', type=int, default=128, help='prediction sequence length')
     parser.add_argument('--n1',type=int,default=256,help='First Embedded representation')
