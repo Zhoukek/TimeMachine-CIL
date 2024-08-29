@@ -40,8 +40,6 @@ class ExperienceReplay(BaseLearner):
                 loss_ce = self.criterion(outputs_buf, y_buf)
 
             outputs = self.model(x)
-            if self.args.encoder == 'TimeMachine':
-                y = y.repeat_interleave(3)
             loss_ce += self.criterion(outputs, y)
             loss_ce.backward()
             self.optimizer_step(epoch=epoch)

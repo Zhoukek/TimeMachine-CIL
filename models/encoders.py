@@ -514,10 +514,10 @@ class MambaEncoder(torch.nn.Module):
         self.configs = configs
 
         self.lin1 = torch.nn.Linear(self.configs.seq_len, self.configs.n1)
-        self.dropout1 = torch.nn.Dropout(self.configs.dropout)
+        self.dropout1 = torch.nn.Dropout(self.configs.mamba_dropout)
 
         self.lin2 = torch.nn.Linear(self.configs.n1, self.configs.n2)
-        self.dropout2 = torch.nn.Dropout(self.configs.dropout)
+        self.dropout2 = torch.nn.Dropout(self.configs.mamba_dropout)
         if self.configs.ch_ind == 1:
             self.d_model_param1 = 1
             self.d_model_param2 = 1
@@ -590,6 +590,8 @@ class MambaEncoder(torch.nn.Module):
 
         x = torch.cat([x, x4], dim=2)
         x = x.squeeze(1)
+        new_size = x.size(0) // 3
+        x = x.view(new_size, self.configs.enc_in, -1).mean(dim=1)
         x = self.lin4(x)
         # if self.configs.ch_ind == 1:
         #     x = torch.reshape(x, (-1, self.configs.enc_in, self.configs.pred_len))
