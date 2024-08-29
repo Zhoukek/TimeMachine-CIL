@@ -2,19 +2,26 @@
 import torch.nn as nn
 from models.classifier import SingleHead, CosineLinear, SplitCosineLinear
 from utils.setup_elements import input_size_match, n_classes_per_task, get_num_classes
-from models.encoders import CNNEncoder, TSTEncoder
+from models.encoders import CNNEncoder, TSTEncoder, MambaEncoder
 from models.utils import TransposedInstanceNorm1d
+import torch
+from mamba_ssm import Mamba
+from TimeMachine_supervised.RevIN.RevIN import RevIN
 
 
 class SingleHeadModel(nn.Module):
-    def __init__(self, encoder, head, input_channels, feature_dims, n_layers, seq_len, n_base_nodes, norm, input_norm, dropout):
+    def __init__(self, encoder, head, input_channels, feature_dims, n_layers, seq_len, n_base_nodes, norm, input_norm, dropout, configs):
         super(SingleHeadModel, self).__init__()
-
+        self.configs = configs
+        self.input_norm_name = input_norm
 
         if input_norm == 'LN':
             self.input_norm = nn.LayerNorm(input_channels, elementwise_affine=False)  # Without learnable transform
         elif input_norm == 'IN':
             self.input_norm = TransposedInstanceNorm1d(input_channels, affine=False)  # Not perform well on GrabMyo
+        elif input_norm == 'RevIN':
+            if self.configs.revin == 1:
+                self.input_norm = RevIN(self.configs.enc_in)
         else:
             self.input_norm = None
 
@@ -25,7 +32,8 @@ class SingleHeadModel(nn.Module):
             self.encoder = TSTEncoder(input_channels, seq_len, n_layers=n_layers, d_model=feature_dims,
                                       d_ff=2 * feature_dims, norm=norm, attn_dropout=dropout, dropout=dropout,
                                       res_attention=True, pe='sincos')
-
+        elif encoder == 'TimeMachine':
+            self.encoder = MambaEncoder(configs=self.configs)
         else:
             raise ValueError("Backbone must be CNN or TST")
 
@@ -57,7 +65,10 @@ class SingleHeadModel(nn.Module):
 
     def forward(self, x):
         if self.input_norm:
-            x = self.input_norm(x)
+            if self.input_norm_name == 'RevIN':
+                x = self.input_norm(x, 'norm')
+            else:
+                x = self.input_norm(x)
         x = self.encoder(x)
         x = self.head(x)
         return x
@@ -100,5 +111,5 @@ def setup_model(args):
                  norm=args.norm,
                  input_norm=args.input_norm,
                  dropout=args.dropout,
-                 ).to(args.device)
+                 configs=args).to(args.device)
 

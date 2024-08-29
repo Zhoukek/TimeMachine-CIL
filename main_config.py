@@ -32,8 +32,8 @@ if __name__ == "__main__":
                                  'ninapro', 'sines'])
 
     # Backbone
-    parser.add_argument('--encoder', dest='encoder', default='CNN', type=str,
-                        choices=['CNN', 'TST'])
+    parser.add_argument('--encoder', dest='encoder', default='TimeMachine', type=str,
+                        choices=['CNN', 'TST', 'TimeMachine'])
 
     # Classifier
     parser.add_argument('--head', dest='head', default='Linear', type=str,
@@ -47,8 +47,8 @@ if __name__ == "__main__":
     parser.add_argument('--norm', dest='norm', default='BN', type=str,
                         choices=['BN', 'LN', 'IN', 'BIN', 'SwitchNorm', 'StochNorm'])
 
-    parser.add_argument('--input_norm', dest='input_norm', default='IN', type=str,
-                        choices=['LN', 'IN', 'ZScore', 'none'])  # ZScore is only applicable for Offline
+    parser.add_argument('--input_norm', dest='input_norm', default='RevIN', type=str,
+                        choices=['LN', 'IN', 'ZScore', 'RevIN', 'none'])  # ZScore is only applicable for Offline
 
     """ General params """
     parser.add_argument('--runs', dest='runs', default=1, type=int,
@@ -157,6 +157,25 @@ if __name__ == "__main__":
     parser.add_argument('--feat_scale', type=float, default=1)  # No loss_feat if == 0
     parser.add_argument('--k_freq', type=int, default=-1)  # All freq if == -1, no loss_freq if == 0
     parser.add_argument('--regularize_freq_on_feat', default=False, type=boolean_string)
+
+    # Mamba setting
+    parser.add_argument('--seq_len', type=int, default=96, help='input sequence length')
+    parser.add_argument('--label_len', type=int, default=48, help='start token length')
+    parser.add_argument('--pred_len', type=int, default=128, help='prediction sequence length')
+    parser.add_argument('--n1',type=int,default=256,help='First Embedded representation')
+    parser.add_argument('--n2',type=int,default=128,help='Second Embedded representation')
+
+    parser.add_argument('--revin', type=int, default=1, help='RevIN; True 1 False 0')
+    parser.add_argument('--ch_ind', type=int, default=1, help='Channel Independence; True 1 False 0')
+    parser.add_argument('--residual', type=int, default=1, help='Residual Connection; True 1 False 0')
+    parser.add_argument('--d_state', type=int, default=256, help='d_state parameter of Mamba')
+    parser.add_argument('--dconv', type=int, default=2, help='d_conv parameter of Mamba')
+    parser.add_argument('--e_fact', type=int, default=1, help='expand factor parameter of Mamba')
+    parser.add_argument('--enc_in', type=int, default=3, help='encoder input size') #Use this hyperparameter as the number of channels
+    parser.add_argument('--mamba_dropout', type=float, default=0.05, help='dropout')
+    parser.add_argument('--embed', type=str, default='timeF',
+                        help='time features encoding, options:[timeF, fixed, learned]')
+    parser.add_argument('--do_predict', action='store_true', help='whether to predict unseen future data')
 
     args = parser.parse_args()
     args.device = 'cuda' if torch.cuda.is_available() else 'cpu'
