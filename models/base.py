@@ -51,7 +51,11 @@ class SingleHeadModel(nn.Module):
         """
         if self.input_norm:
             x = self.input_norm(x)
-        feature_map = self.encoder(x, pooling=False)
+        if self.configs.encoder == 'TimeMachine':
+            feature_map = self.encoder(x, pooling=False)
+        else:
+            feature_map = self.encoder(x, pooling=False)
+        # feature_map = self.encoder(x, pooling=False)
         return feature_map
 
     def feature(self, x):
@@ -59,8 +63,14 @@ class SingleHeadModel(nn.Module):
         Return the feature vector after GAP, (N, D)
         """
         if self.input_norm:
-            x = self.input_norm(x)
-        feature = self.encoder(x, pooling=True)
+            if self.input_norm_name == 'RevIN':
+                x = self.input_norm(x, 'norm')
+            else:
+                x = self.input_norm(x)
+        if self.configs.encoder == 'TimeMachine':
+            feature = self.encoder(x)
+        else:
+            feature = self.encoder(x, pooling=True)
         return feature
 
     def forward(self, x):

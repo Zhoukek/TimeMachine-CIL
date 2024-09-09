@@ -513,11 +513,18 @@ class MambaEncoder(torch.nn.Module):
         super(MambaEncoder, self).__init__()
         self.configs = configs
 
-        self.lin1 = torch.nn.Linear(self.configs.seq_len, self.configs.n1)
+        self.lin1 = torch.nn.Linear(self.configs.seq_len, self.configs.n2)
         self.dropout1 = torch.nn.Dropout(self.configs.mamba_dropout)
 
         self.lin2 = torch.nn.Linear(self.configs.n1, self.configs.n2)
         self.dropout2 = torch.nn.Dropout(self.configs.mamba_dropout)
+
+        self.lin3 = torch.nn.Linear(self.configs.n2 * 2, self.configs.n2)
+        self.dropout3 = torch.nn.Dropout(self.configs.mamba_dropout)
+
+        self.lin4 = torch.nn.Linear(self.configs.n2 * 2, self.configs.n2)
+        self.dropout4 = torch.nn.Dropout(self.configs.mamba_dropout)
+
         if self.configs.ch_ind == 1:
             self.d_model_param1 = 1
             self.d_model_param2 = 1
@@ -526,19 +533,23 @@ class MambaEncoder(torch.nn.Module):
             self.d_model_param1 = self.configs.n2
             self.d_model_param2 = self.configs.n1
 
-        self.mamba1 = Mamba(d_model=self.d_model_param1, d_state=self.configs.d_state, d_conv=self.configs.dconv,
+        # self.mamba1 = Mamba(d_model=self.d_model_param1, d_state=self.configs.d_state, d_conv=self.configs.dconv,
+        #                     expand=self.configs.e_fact)
+        # self.mamba2 = Mamba(d_model=self.configs.n2, d_state=self.configs.d_state, d_conv=self.configs.dconv,
+        #                     expand=self.configs.e_fact)
+        self.mamba1 = Mamba(d_model=self.configs.n2, d_state=self.configs.d_state, d_conv=self.configs.dconv,
                             expand=self.configs.e_fact)
         self.mamba2 = Mamba(d_model=self.configs.n2, d_state=self.configs.d_state, d_conv=self.configs.dconv,
                             expand=self.configs.e_fact)
-        self.mamba3 = Mamba(d_model=self.configs.n1, d_state=self.configs.d_state, d_conv=self.configs.dconv,
+        self.mamba3 = Mamba(d_model=self.configs.n2, d_state=self.configs.d_state, d_conv=self.configs.dconv,
                             expand=self.configs.e_fact)
-        self.mamba4 = Mamba(d_model=self.d_model_param2, d_state=self.configs.d_state, d_conv=self.configs.dconv,
+        self.mamba4 = Mamba(d_model=self.configs.n2, d_state=self.configs.d_state, d_conv=self.configs.dconv,
                             expand=self.configs.e_fact)
 
-        self.lin3 = torch.nn.Linear(self.configs.n2, self.configs.n1)
-        self.lin4 = torch.nn.Linear(2 * self.configs.n1, self.configs.pred_len)
+        # self.lin3 = torch.nn.Linear(self.configs.n2, self.configs.n1)
+        # self.lin4 = torch.nn.Linear(2 * self.configs.n1, self.configs.pred_len)
 
-    def forward(self, x):
+    def forward(self, x, pooling=True):
         # if self.configs.revin == 1:
         #     x = self.revin_layer(x, 'norm')
         # else:
@@ -554,45 +565,44 @@ class MambaEncoder(torch.nn.Module):
         x = self.lin1(x)
         x_res1 = x
         x = self.dropout1(x)
-        x3 = self.mamba3(x)
-        if self.configs.ch_ind == 1:
-            x4 = torch.permute(x, (0, 2, 1))
+        x = self.mamba1(x)
+
+        # x = x_res1 + x
+
+        # x = self.lin2(x)
+        # x_res2 = x
+        # x = self.dropout2(x)
+        # x = self.mamba2(x)
+        # x = x_res2 + x
+
+        # x = self.lin3(x)
+        # x_res3 = x
+        # x = self.dropout3(x)
+        # x = self.mamba3(x)
+        # x = x_res3 + x
+        #
+        # x = self.lin4(x)
+        # # x_res4 = x
+        # x = self.dropout4(x)
+        # x = self.mamba4(x)
+        # # x = x_res4 + x
+
+
+
+        # x = self.lin3(x)
+        # if self.configs.residual == 1:
+        #     x = x + x_res1
+        #
+        # x = torch.cat([x, x4], dim=2)
+        # # x = x.squeeze(1)
+        if pooling:
+            if self.configs.ch_ind == 1:
+                new_size = x.size(0) // self.configs.enc_in
+                x = x.view(new_size, self.configs.enc_in, -1).mean(dim=1)
+            x = x.mean(dim=1)
         else:
-            x4 = x
-        x4 = self.mamba4(x4)
-        if self.configs.ch_ind == 1:
-            x4 = torch.permute(x4, (0, 2, 1))
-
-        x4 = x4 + x3
-
-        x = self.lin2(x)
-        x_res2 = x
-        x = self.dropout2(x)
-
-        if self.configs.ch_ind == 1:
-            x1 = torch.permute(x, (0, 2, 1))
-        else:
-            x1 = x
-        x1 = self.mamba1(x1)
-        if self.configs.ch_ind == 1:
-            x1 = torch.permute(x1, (0, 2, 1))
-
-        x2 = self.mamba2(x)
-
-        if self.configs.residual == 1:
-            x = x1 + x_res2 + x2
-        else:
-            x = x1 + x2
-
-        x = self.lin3(x)
-        if self.configs.residual == 1:
-            x = x + x_res1
-
-        x = torch.cat([x, x4], dim=2)
-        x = x.squeeze(1)
-        new_size = x.size(0) // 3
-        x = x.view(new_size, self.configs.enc_in, -1).mean(dim=1)
-        x = self.lin4(x)
+            return x
+        # x = self.lin4(x)
         # if self.configs.ch_ind == 1:
         #     x = torch.reshape(x, (-1, self.configs.enc_in, self.configs.pred_len))
         #
